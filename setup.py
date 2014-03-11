@@ -39,7 +39,7 @@ setup(
     license='GPLv2',
     author='Invenio collaboration',
     author_email='info@invenio-software.org',
-    description='Flask-RateLimiter is an extension for Flask that CHANGEME.',
+    description='Flask-RateLimiter is an extension for Flask that adds support for rate limiting.',
     long_description=open('README.rst').read(),
     packages=['flask_ratelimiter', 'flask_ratelimiter.apackage'],
     zip_safe=False,

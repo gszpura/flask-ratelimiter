@@ -19,8 +19,6 @@ application and initialize the extension:
 >>> app = Flask('myapp')
 >>> ext = RateLimiter(app=app)
 
-Some Extended Example
----------------------
-Flask-RateLimiter also has support for CHANGEME
+>>> CHANGEME
 
 .. literalinclude:: ../tests/helpers.py
