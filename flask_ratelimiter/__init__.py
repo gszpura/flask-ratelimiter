@@ -37,7 +37,7 @@ You can use ratelimit decorator like this:
 
 >>> from flask_ratelimiter import ratelimit
 >>>
->>> @ratelimit(current_app, 300, 200)
+>>> @ratelimit(300, 200)
 >>> def some_view():
 >>>     return 'HelloWorld'
 
@@ -151,7 +151,7 @@ class RateLimiter(object):
             config['RATELIMITER_KEY_PREFIX'] = config['CACHE_KEY_PREFIX']
 
 
-def ratelimit(app, limit, per=300, send_x_headers=True,
+def ratelimit(limit, per=300, send_x_headers=True,
               over_limit=on_over_limit,
               scope_func=lambda: request.remote_addr,
               key_func=lambda: request.endpoint):
@@ -160,14 +160,14 @@ def ratelimit(app, limit, per=300, send_x_headers=True,
 
     Example:
 
-    @ratelimit(current_app, 30, 10)
+    @ratelimit(30, 10)
     def index():
         return "HelloWorld"
     """
     def decorator(f):
         def rate_limited(*args, **kwargs):
-            ratelimiter = app.extensions['ratelimiter']
-            prefix = app.config['RATELIMITER_KEY_PREFIX']
+            ratelimiter = current_app.extensions['ratelimiter']
+            prefix = current_app.config['RATELIMITER_KEY_PREFIX']
             key = prefix + '/%s/%s/' % (key_func(), scope_func())
             limit_exceeded, remaining = ratelimiter.backend.update(key, limit, per)
 

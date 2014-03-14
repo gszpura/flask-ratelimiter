@@ -41,7 +41,7 @@ class TestRateLimiter(FlaskTestCase):
         rl = RateLimiter(self.app)
 
         @self.app.route('/limit')
-        @ratelimit(current_app, 2, 10)
+        @ratelimit(2, 10)
         def test_limit():
             return 'limit'
 
@@ -75,7 +75,7 @@ class TestRateLimiter(FlaskTestCase):
         rl.set_backend('SimpleRedisBackend')
 
         @self.app.route('/limit2')
-        @ratelimit(current_app, 3, 5)
+        @ratelimit(3, 5)
         def test_limit2():
             return 'limit'
 
