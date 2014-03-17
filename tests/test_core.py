@@ -27,9 +27,7 @@ from .helpers import FlaskTestCase
 
 from flask import Blueprint, Flask, request, url_for, g, current_app
 from flask.ext.ratelimiter import RateLimiter, \
-    ratelimit, \
-    get_backend, \
-    DEFAULT_BACKEND
+    ratelimit
 from flask.ext.cache import Cache
 
 
@@ -69,21 +67,6 @@ class TestRateLimiter(FlaskTestCase):
             assert g._rate_limit_info.remaining == 0
             assert g._rate_limit_info.limit_exceeded == True
             assert res.status_code == 429
-
-    def test_set_backend(self):
-        rl = RateLimiter(self.app)
-        rl.set_backend('SimpleRedisBackend')
-
-        @self.app.route('/limit2')
-        @ratelimit(3, 5)
-        def test_limit2():
-            return 'limit'
-
-        with self.app.test_client() as c:
-            res = c.get('/limit2')
-            assert request.endpoint == 'test_limit2'
-            assert g._rate_limit_info.remaining == 2
-            assert res.get_data() == 'limit'
 
     def test_flask_cache_prefix(self):
         cache = Cache(self.app, config={'CACHE_TYPE': 'redis'})
@@ -136,11 +119,11 @@ class TestGetBackend(FlaskTestCase):
         """
         tests get_backend function with correct input
         """
-        backend = get_backend('SimpleRedisBackend')
+        backend = RateLimiter.get_backend('SimpleRedisBackend')
         assert backend.__name__ == 'SimpleRedisBackend'
 
     def test_get_incorrect_backend(self):
         """
         tests get_backend function with incorrect input
         """
-        assert get_backend('CrazyBackendX').__name__ == DEFAULT_BACKEND
+        assert RateLimiter.get_backend('CrazyBackendX').__name__ == 'SimpleRedisBackend'

@@ -55,9 +55,6 @@ from flask import Blueprint, current_app, request, g
 from functools import update_wrapper
 
 
-DEFAULT_BACKEND = 'SimpleRedisBackend'
-
-
 class RateLimitInfo(object):
     """
     Stores information about rate limiting.
@@ -70,24 +67,11 @@ class RateLimitInfo(object):
             setattr(self, key, value)
 
 
-def get_backend(name):
-    """
-    Returns backend for RateLimiter.
-    If there is no such backend, default backend
-    will be returned.
-    """
-    from . import backends
-    try:
-        backend = getattr(backends, name)
-    except AttributeError:
-        return getattr(backends, DEFAULT_BACKEND)
-    return backend
-
-
 def on_over_limit(rate_limit_info):
     """
     Default response which will be displayed
     when rate limit is exceeded.
+    :param rate_limit_info: RateLimitInfo object
     """
     return "Rate limit was exceeded", 429
 
@@ -128,7 +112,7 @@ class RateLimiter(object):
 
         config = app.config
 
-        config.setdefault('RATELIMITER_BACKEND', DEFAULT_BACKEND)
+        config.setdefault('RATELIMITER_BACKEND', 'SimpleRedisBackend')
         config.setdefault('RATELIMITER_BACKEND_OPTIONS', {})
         config.setdefault('RATELIMITER_INJECT_X_HEADERS', True)
         config.setdefault('RATELIMITER_KEY_PREFIX', 'rate_limit')
@@ -146,13 +130,21 @@ class RateLimiter(object):
                 return response
 
         options = config['RATELIMITER_BACKEND_OPTIONS']
-        self.backend = get_backend(config['RATELIMITER_BACKEND'])(**options)
+        self.backend = RateLimiter.get_backend(config['RATELIMITER_BACKEND'])(**options)
 
-    def set_backend(self, name, **options):
+    @staticmethod
+    def get_backend(name):
         """
-        Set/Change backend before first request.
+        Returns backend for RateLimiter.
+        If there is no such backend, default backend
+        will be returned.
         """
-        self.backend = get_backend(name)(**options)
+        from . import backends
+        try:
+            backend = getattr(backends, name)
+        except AttributeError:
+            return getattr(backends, 'SimpleRedisBackend')
+        return backend
 
     def _change_prefix_if_flask_cache(self, config):
         """
