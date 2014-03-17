@@ -21,43 +21,23 @@
 ## granted to it by virtue of its status as an Intergovernmental Organization
 ## or submit itself to any jurisdiction.
 
-"""
-Amodule User Documentation
-===========================
 
-Your user documentation goes here. This documentation is included
-in the Sphinx documentation.
-
-Doc tests are written like this:
-
->>> from flask import Flask, Blueprint
->>> from flask_ratelimiter import RateLimiter
->>> def create_app():
-...     app = Flask('myapp')
-...     ext = RateLimiter(app=app)
-...     return app
->>> app = create_app()
-
-You run doc tests like this::
-
-    pip install Sphinx
-    python setup.py build_sphinx -b doctest
-
-By default Tox will run both unit tests and doc tests in all.
-
-Subheading
-^^^^^^^^^^
-Some more documentation
-"""
-
-from __future__ import absolute_import
-
-
-class AClass(object):
+class Backend(object):
     """
-    API documentation goes here.
-
-    :param avar: Description of avar
+    Abstract backend for inheriting purposes.
     """
-    def __init__(self, avar):
-        self.a = avar
+
+    def __init__(self, **kwargs):
+
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
+
+    def update(self):
+        """
+        Every new backend needs to implement this function.
+
+        Function needs to return tuple with two values:
+        * limit_exceeded - boolean, checks if limit was exceeded
+        * remaining - how many request have left to exceed the limit
+        """
+        raise NotImplementedError

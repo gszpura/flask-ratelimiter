@@ -20,3 +20,20 @@
 ## In applying this licence, CERN does not waive the privileges and immunities
 ## granted to it by virtue of its status as an Intergovernmental Organization
 ## or submit itself to any jurisdiction.
+from __future__ import absolute_import
+
+from .simpleredis_backend import SimpleRedisBackend
+
+
+class FlaskCacheRedisBackend(SimpleRedisBackend):
+    """
+    Backend which uses Flask-Cache to store keys in Redis.
+    """
+    expiration_window = 10
+
+    def __init__(self, cache=None, **kwargs):
+        self.cache = cache
+        if self.cache.__class__.__name__ != 'Cache':
+            raise ValueError('Incorrect cache was passed as an argument')
+        self.pipeline = self.cache.cache._client.pipeline()
+        super(SimpleRedisBackend, self).__init__(**kwargs)

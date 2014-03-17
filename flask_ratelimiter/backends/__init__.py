@@ -20,17 +20,8 @@
 ## In applying this licence, CERN does not waive the privileges and immunities
 ## granted to it by virtue of its status as an Intergovernmental Organization
 ## or submit itself to any jurisdiction.
-
 from __future__ import absolute_import
 
-from .helpers import FlaskTestCase
-from flask_ratelimiter.apackage.amodule import AClass
-
-
-class TestAClass(FlaskTestCase):
-    """
-    Tests of Aclass
-    """
-    def test_init(self):
-        a = AClass(None)
-        assert a.a is None
+from .backend import Backend
+from .simpleredis_backend import SimpleRedisBackend
+from .flaskcacheredis_backend import FlaskCacheRedisBackend

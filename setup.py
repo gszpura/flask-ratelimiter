@@ -41,7 +41,7 @@ setup(
     author_email='info@invenio-software.org',
     description='Flask-RateLimiter is an extension for Flask that adds support for rate limiting.',
     long_description=open('README.rst').read(),
-    packages=['flask_ratelimiter', 'flask_ratelimiter.apackage'],
+    packages=['flask_ratelimiter', 'flask_ratelimiter.backends'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
