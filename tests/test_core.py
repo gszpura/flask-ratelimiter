@@ -23,12 +23,18 @@
 
 from __future__ import absolute_import
 
+import unittest
 from .helpers import FlaskTestCase
 
 from flask import Blueprint, Flask, request, url_for, g, current_app
 from flask.ext.ratelimiter import RateLimiter, \
     ratelimit
-from flask.ext.cache import Cache
+try:
+    from flask.ext.cache import Cache
+    is_cache_installed = True
+except ImportError:
+    is_cache_installed = False
+
 
 
 class TestRateLimiter(FlaskTestCase):
@@ -68,6 +74,7 @@ class TestRateLimiter(FlaskTestCase):
             assert g._rate_limit_info.limit_exceeded == True
             assert res.status_code == 429
 
+    @unittest.skipUnless(is_cache_installed, 'Flask-Cache is not installed')
     def test_flask_cache_prefix(self):
         cache = Cache(self.app, config={'CACHE_TYPE': 'redis'})
         prefix = 'flask_cache_prefix'

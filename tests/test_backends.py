@@ -23,10 +23,15 @@
 
 from __future__ import absolute_import
 
+import unittest
 from .helpers import FlaskTestCase
 from flask.ext.ratelimiter import RateLimiter
 from flask.ext.ratelimiter.backends import *
-from flask.ext.cache import Cache
+try:
+    from flask.ext.cache import Cache
+    is_cache_installed = True
+except ImportError:
+    is_cache_installed = False
 
 from flask import Blueprint, Flask, request, url_for, g, current_app
 
@@ -64,6 +69,7 @@ class TestSimpleRedisBackend(FlaskTestCase):
 
 class TestFlaskCacheRedisBackend(FlaskTestCase):
 
+    @unittest.skipUnless(is_cache_installed, 'Flask-Cache is not installed')
     def test_backend_with_app(self):
         cache = Cache(self.app, config={'CACHE_TYPE': 'redis'})
 
