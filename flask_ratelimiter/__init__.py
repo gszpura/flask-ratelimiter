@@ -130,8 +130,20 @@ class RateLimiter(object):
 
         config.setdefault('RATELIMITER_BACKEND', DEFAULT_BACKEND)
         config.setdefault('RATELIMITER_BACKEND_OPTIONS', {})
+        config.setdefault('RATELIMITER_INJECT_X_HEADERS', True)
         config.setdefault('RATELIMITER_KEY_PREFIX', 'rate_limit')
         self._change_prefix_if_flask_cache(config)
+
+        if config['RATELIMITER_INJECT_X_HEADERS']:
+            @app.after_request
+            def inject_x_headers(response):
+                info = getattr(g, '_rate_limit_info', None)
+                if info and info.send_x_headers:
+                    h = response.headers
+                    h.add('X-RateLimit-Remaining', str(info.remaining))
+                    h.add('X-RateLimit-Limit', str(info.limit))
+                    h.add('X-RateLimit-Reset', str(info.reset))
+                return response
 
         options = config['RATELIMITER_BACKEND_OPTIONS']
         self.backend = get_backend(config['RATELIMITER_BACKEND'])(**options)
@@ -169,12 +181,13 @@ def ratelimit(limit, per=300, send_x_headers=True,
             ratelimiter = current_app.extensions['ratelimiter']
             prefix = current_app.config['RATELIMITER_KEY_PREFIX']
             key = prefix + '/%s/%s/' % (key_func(), scope_func())
-            limit_exceeded, remaining = ratelimiter.backend.update(key, limit, per)
+            limit_exceeded, remaining, reset = ratelimiter.backend.update(key, limit, per)
 
             info = RateLimitInfo(limit=limit,
                                  per=per,
                                  limit_exceeded=limit_exceeded,
                                  remaining=remaining,
+                                 reset=reset,
                                  send_x_headers=send_x_headers)
             g._rate_limit_info = info
 

@@ -39,5 +39,6 @@ class Backend(object):
         Function needs to return tuple with two values:
         * limit_exceeded - boolean, checks if limit was exceeded
         * remaining - how many request have left to exceed the limit
+        * reset - the remaining window before the rate limit resets
         """
         raise NotImplementedError

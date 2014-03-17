@@ -63,4 +63,4 @@ class SimpleRedisBackend(Backend):
 
         limit_exceeded = current >= limit
         remaining = limit - current
-        return limit_exceeded, remaining
+        return limit_exceeded, remaining, reset

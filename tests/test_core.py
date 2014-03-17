@@ -96,6 +96,35 @@ class TestRateLimiter(FlaskTestCase):
         r = RateLimiter(self.app)
         assert self.app.config['RATELIMITER_KEY_PREFIX'] == prefix
 
+    def test_ratelimit_headers(self):
+        rl = RateLimiter(self.app)
+
+        @self.app.route('/limit3')
+        @ratelimit(2, 10)
+        def test_limit3():
+            return 'limit'
+
+        with self.app.test_client() as c:
+            res = c.get('/limit3')
+            assert request.endpoint == 'test_limit3'
+            assert int(res.headers.get('X-RateLimit-Limit')) == 2
+            assert int(res.headers.get('X-RateLimit-Remaining')) == 1
+            assert res.headers.get('X-RateLimit-Reset', None) != None
+
+    def test_ratelimit_no_headers_sent(self):
+        self.app.config.setdefault('RATELIMITER_INJECT_X_HEADERS', False)
+        rl = RateLimiter(self.app)
+
+        @self.app.route('/limit4')
+        @ratelimit(2, 10)
+        def test_limit4():
+            return 'limit'
+
+        with self.app.test_client() as c:
+            res = c.get('/limit4')
+            assert request.endpoint == 'test_limit4'
+            assert res.headers.get('X-RateLimit-Limit', None) == None
+            assert res.headers.get('X-RateLimit-Remaining', None) == None
 
 
 class TestGetBackend(FlaskTestCase):

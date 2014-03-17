@@ -49,13 +49,15 @@ class TestSimpleRedisBackend(FlaskTestCase):
         assert b.redis != None
         assert b.pipeline.__class__.__name__ == 'Pipeline'
 
-        limit_exceeded, remaining = b.update('redis_backend', 3, 5)
+        limit_exceeded, remaining, reset = b.update('redis_backend', 3, 5)
         assert limit_exceeded == False
         assert remaining == 2
-        limit_exceeded, remaining = b.update('redis_backend', 3, 5)
+
+        limit_exceeded, remaining, reset = b.update('redis_backend', 3, 5)
         assert limit_exceeded == False
         assert remaining == 1
-        limit_exceeded, remaining = b.update('redis_backend', 3, 5)
+
+        limit_exceeded, remaining, reset = b.update('redis_backend', 3, 5)
         assert limit_exceeded == True
         assert remaining == 0
 
@@ -70,18 +72,17 @@ class TestFlaskCacheRedisBackend(FlaskTestCase):
                                    {'cache': cache})
         r = RateLimiter(self.app)
 
-        limit_exceeded, remaining = r.backend.update('flask_cache_backend', 3, 5)
+        limit_exceeded, remaining, reset = r.backend.update('flask_cache_backend', 3, 5)
         assert limit_exceeded == False
         assert remaining == 2
 
-        limit_exceeded, remaining = r.backend.update('flask_cache_backend', 3, 5)
+        limit_exceeded, remaining, reset = r.backend.update('flask_cache_backend', 3, 5)
         assert limit_exceeded == False
         assert remaining == 1
 
-        limit_exceeded, remaining = r.backend.update('flask_cache_backend', 3, 5)
+        limit_exceeded, remaining, reset = r.backend.update('flask_cache_backend', 3, 5)
         assert limit_exceeded == True
         assert remaining == 0
-
 
     def test_backend_wrong_cache(self):
         self.assertRaises(ValueError, lambda: FlaskCacheRedisBackend('WrongCache'))
